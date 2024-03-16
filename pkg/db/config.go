@@ -32,7 +32,7 @@ type DBConfig struct {
 // GetConn - get db connection using DbConfig
 func (dbc *DBConfig) GetConn() (db *sql.DB, err error) {
 	dsn := ""
-	if dsn, err = dbc.dsn(); err != nil {
+	if dsn, err = dbc.GenerateDSN(); err != nil {
 		return
 	}
 
@@ -49,7 +49,7 @@ func (dbc *DBConfig) GetConn() (db *sql.DB, err error) {
 // GetORMConn - get db connection using DbConfig
 func (dbc *DBConfig) GetORMConn() (db *gorm.DB, err error) {
 	dsn := ""
-	if dsn, err = dbc.dsn(); err != nil {
+	if dsn, err = dbc.GenerateDSN(); err != nil {
 		return
 	}
 
@@ -76,8 +76,8 @@ func (dbc *DBConfig) GetORMConn() (db *gorm.DB, err error) {
 /*
 * - postgres: https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING
  */
-func (dbc *DBConfig) dsn() (connStr string, err error) {
-	if err = dbc.checkValid(); err != nil {
+func (dbc *DBConfig) GenerateDSN() (connStr string, err error) {
+	if err = dbc.CheckValid(); err != nil {
 		return
 	}
 	switch dbc.Driver {
@@ -101,7 +101,7 @@ func (dbc *DBConfig) dsn() (connStr string, err error) {
 	return
 }
 
-func (dbc *DBConfig) checkValid() (err error) {
+func (dbc *DBConfig) CheckValid() (err error) {
 	supportDrivers := []string{MySQLDriver}
 	if !slices.Contains(supportDrivers, dbc.Driver) {
 		return fmt.Errorf("not support for driver (%s)", dbc.Driver)
