@@ -3,9 +3,10 @@ package variables
 import "time"
 
 const (
-	MarketSZ Market = "sz" // 深圳交易所
-	MarketSH Market = "sh" // 上海交易所
-	MarketBJ Market = "bj"
+	MarketUnknown Market = "unknown"
+	MarketSZ      Market = "sz" // 深圳交易所
+	MarketSH      Market = "sh" // 上海交易所
+	MarketBJ      Market = "bj"
 )
 
 type Market string
@@ -28,4 +29,17 @@ type Code struct {
 
 func (c *Code) UniMark() string {
 	return string(c.Market) + c.Number
+}
+
+func GetMarketByNumber(num string) Market {
+	switch num[0] {
+	case '6':
+		return MarketSH
+	case '0', '3':
+		return MarketSZ
+	case '4', '8':
+		return MarketBJ
+	}
+
+	return MarketUnknown
 }

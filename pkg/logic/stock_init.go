@@ -9,9 +9,11 @@ import (
 	stockapi "github.com/cassiaman7/investment/stock_api"
 	"github.com/cassiaman7/investment/stock_api/variables"
 	talib "github.com/markcheno/go-talib"
+	"gorm.io/gorm/clause"
 )
 
 func InitStockData(ts variables.Code) error {
+	fmt.Printf("start %s\n", ts.UniMark())
 	data, err := stockapi.GetStockTimeSeriesByCode(ts)
 	if err != nil {
 		return err
@@ -48,7 +50,7 @@ func InitStockData(ts variables.Code) error {
 			QuoteRows[i].PreClose = QuoteRows[i-1].Close
 		}
 
-		err = meta.MetaDB.Orm.Create(&QuoteRows[i]).Error
+		err = meta.MetaDB.Orm.Clauses(clause.Insert{Modifier: "IGNORE"}).Create(&QuoteRows[i]).Error
 		if err != nil {
 			return fmt.Errorf("write [%s%s]-%s fail, err: %v",
 				ts.Market, ts.Number, ts.Name, err)
@@ -68,13 +70,22 @@ func closeSeries(data []variables.Quote) (b []float64) {
 }
 
 func smaFn(closeSeries []float64, timePeriod int) (sma []float64) {
+	if len(closeSeries) < timePeriod {
+		return make([]float64, len(closeSeries))
+	}
 	return talib.Sma(closeSeries, timePeriod)
 }
 
 func bollBandFn(closeSeries []float64, timePeriod int) (up []float64, mid []float64, lower []float64) {
+	if len(closeSeries) < timePeriod {
+		return make([]float64, len(closeSeries)), make([]float64, len(closeSeries)), make([]float64, len(closeSeries))
+	}
 	return talib.BBands(closeSeries, timePeriod, 2, 2, talib.SMA)
 }
 
 func macdFn(closeSeries []float64) (outMACD []float64, outMACDSignal []float64, outMACDHist []float64) {
+	if len(closeSeries) < 26 {
+		return make([]float64, len(closeSeries)), make([]float64, len(closeSeries)), make([]float64, len(closeSeries))
+	}
 	return talib.Macd(closeSeries, 12, 26, 9)
 }

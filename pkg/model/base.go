@@ -9,10 +9,9 @@ import (
 func MigrateTables(db *gorm.DB, tabs ...[]any) (err error) {
 	for _, tablist := range tabs {
 		for _, tab := range tablist {
-			if !db.Migrator().HasTable(tab) {
-				if err = db.AutoMigrate(tab); err != nil {
-					return err
-				}
+			if err = db.Set("gorm:table_options", "engine=innodb row_format=compressed key_block_size=8").
+				AutoMigrate(tab); err != nil {
+				return err
 			}
 		}
 	}

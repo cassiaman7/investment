@@ -7,9 +7,13 @@ import (
 )
 
 func TestGetStockDataBy(t *testing.T) {
+	// code := variables.Code{
+	// 	Market: variables.MarketSH,
+	// 	Number: "510050",
+	// }
 	code := variables.Code{
-		Market: variables.MarketSH,
-		Number: "510050",
+		Market: variables.MarketBJ,
+		Number: "873833",
 	}
 
 	data, err := NewClient().GetStockDataByCode(code)
